@@ -68,7 +68,7 @@ const drawOscilloscope = () => {
 };
 
 // Draw Frequency Graph
-const drawFrequencyGraphs = () => {
+const drawFrequencyGraph = () => {
   frequencyGraphContext.clearRect(
     0,
     0,
@@ -87,10 +87,21 @@ const drawFrequencyGraphs = () => {
       (index * (360 / analyserNode.frequencyBinCount) + hueCounter) % 360;
     const lightness = frequency * (50 / 255);
 
-    frequencyGraphContext.fillStyle = `hsl(${hue}, 100%, ${lightness}%)`;
-    frequencyGraphContext.fillRect(x, y, barWidth, barHeight);
+    const gradient = frequencyGraphContext.createLinearGradient(
+      x - 0.5,
+      0,
+      x - 0.5,
+      frequencyGraphCanvas.height
+    );
+    gradient.addColorStop(0, `hsl(${hue} , 100%, 50%)`);
+    gradient.addColorStop(1, `black`);
 
-    // Spectrogram
+    /*
+    frequencyGraphContext.fillStyle = `hsl(${hue}, 100%, ${lightness}%)`;
+    */
+
+    frequencyGraphContext.fillStyle = gradient;
+    frequencyGraphContext.fillRect(x, y, barWidth, barHeight);
   });
 };
 
@@ -125,7 +136,7 @@ const drawSpectrogram = () => {
   analyserNode.getByteFrequencyData(frequencyDomainBuffer);
 
   drawOscilloscope();
-  drawFrequencyGraphs();
+  drawFrequencyGraph();
   drawSpectrogram();
 
   hueCounter++;
