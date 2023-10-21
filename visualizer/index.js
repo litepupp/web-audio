@@ -3,6 +3,10 @@
 // DOM elements
 const uploadButton = document.getElementById("uploadButton");
 const fileInput = document.getElementById("fileInput");
+if (navigator.maxTouchPoints == 0) {
+  fileInput.accept = "audio/*";
+}
+
 const fftRange = document.getElementById("fftRange");
 const fftLabel = document.getElementById("fftLabel");
 const audioPlayer = document.getElementById("audioPlayer");
@@ -109,7 +113,7 @@ const drawSpectrogram = () => {
   const barWidth = spectrogramCanvas.width / analyserNode.frequencyBinCount;
   const barHeight = spectrogramCanvas.height / analyserNode.frequencyBinCount;
   frequencyDomainBuffer.forEach((frequency, index) => {
-    const x = spectrogramX + barWidth;
+    const x = spectrogramX;
     const y = index * barHeight + barHeight;
 
     spectrogramContext.fillStyle = `rgb(${frequency}, ${frequency}, ${frequency})`;
@@ -124,12 +128,6 @@ const drawSpectrogram = () => {
   }
   if (spectrogramX > spectrogramCanvas.width) {
     spectrogramX = 0;
-    spectrogramContext.clearRect(
-      0,
-      0,
-      spectrogramCanvas.width,
-      spectrogramCanvas.height
-    );
   }
 
   analyserNode.getByteTimeDomainData(timeDomainBuffer);
