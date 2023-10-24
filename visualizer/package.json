@@ -1,0 +1,13 @@
+{
+  "name": "visualizer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "litepupp",
+  "license": "MIT",
+  "scripts": {
+    "dev": "npx tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}
