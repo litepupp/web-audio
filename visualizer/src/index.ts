@@ -50,7 +50,9 @@ const analyserNode = audioContext.createAnalyser();
 audioSourceNode.connect(analyserNode).connect(audioContext.destination);
 
 let timeDomainBuffer = new Uint8Array(analyserNode.fftSize);
-let frequencyDomainBuffer = new Uint8Array(analyserNode.fftSize);
+let frequencyDomainBuffer = new Uint8Array(analyserNode.frequencyBinCount);
+
+const lightMult = 50 / 255;
 
 // Draw the oscilloscope
 const drawOscilloscope = () => {
@@ -62,12 +64,18 @@ const drawOscilloscope = () => {
   );
   oscilloscopeContext.beginPath();
 
+  const widthMult = oscilloscopeCanvas.width / analyserNode.fftSize;
+  const hueMult = 360 / analyserNode.fftSize;
+
   timeDomainBuffer.forEach((amplitude, index) => {
-    oscilloscopeContext.strokeStyle = `hsl(89, 100%, 50%)`;
-    oscilloscopeContext.lineTo(index, amplitude);
+    const x = index * widthMult;
+    const hue = index * hueMult;
+
+    oscilloscopeContext.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+    oscilloscopeContext.lineTo(x, amplitude);
     oscilloscopeContext.stroke();
     oscilloscopeContext.beginPath();
-    oscilloscopeContext.moveTo(index, amplitude);
+    oscilloscopeContext.moveTo(x, amplitude);
   });
 };
 
@@ -79,6 +87,8 @@ const drawFrequencyGraph = () => {
     frequencyGraphCanvas.width,
     frequencyGraphCanvas.height
   );
+
+  const hueMult = 360 / analyserNode.frequencyBinCount;
 
   frequencyDomainBuffer.forEach((frequency, index) => {
     /*
@@ -99,8 +109,8 @@ const drawFrequencyGraph = () => {
     frequencyGraphContext.fillStyle = `hsl(${hue}, 100%, ${lightness}%)`;
     */
 
-    const hue = index * (360 / analyserNode.frequencyBinCount);
-    const lightness = frequency * (50 / 255);
+    const hue = index * hueMult;
+    const lightness = frequency * lightMult;
     frequencyGraphContext.fillStyle = `hsl(${hue}, 100%, ${lightness}%)`;
     frequencyGraphContext.fillRect(index, 256 - frequency, 1, frequency);
   });
@@ -131,7 +141,7 @@ const drawSpectrogram = () => {
   analyserNode.getByteTimeDomainData(timeDomainBuffer);
   analyserNode.getByteFrequencyData(frequencyDomainBuffer);
 
-  // drawOscilloscope();
+  drawOscilloscope();
   drawFrequencyGraph();
   drawSpectrogram();
 

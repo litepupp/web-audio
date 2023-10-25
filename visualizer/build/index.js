@@ -35,22 +35,28 @@ var audioSourceNode = audioContext.createMediaElementSource(audioPlayer);
 var analyserNode = audioContext.createAnalyser();
 audioSourceNode.connect(analyserNode).connect(audioContext.destination);
 var timeDomainBuffer = new Uint8Array(analyserNode.fftSize);
-var frequencyDomainBuffer = new Uint8Array(analyserNode.fftSize);
+var frequencyDomainBuffer = new Uint8Array(analyserNode.frequencyBinCount);
+var lightMult = 50 / 255;
 // Draw the oscilloscope
 var drawOscilloscope = function () {
     oscilloscopeContext.clearRect(0, 0, oscilloscopeCanvas.width, oscilloscopeCanvas.height);
     oscilloscopeContext.beginPath();
+    var widthMult = oscilloscopeCanvas.width / analyserNode.fftSize;
+    var hueMult = 360 / analyserNode.fftSize;
     timeDomainBuffer.forEach(function (amplitude, index) {
-        oscilloscopeContext.strokeStyle = "hsl(89, 100%, 50%)";
-        oscilloscopeContext.lineTo(index, amplitude);
+        var x = index * widthMult;
+        var hue = index * hueMult;
+        oscilloscopeContext.strokeStyle = "hsl(".concat(hue, ", 100%, 50%)");
+        oscilloscopeContext.lineTo(x, amplitude);
         oscilloscopeContext.stroke();
         oscilloscopeContext.beginPath();
-        oscilloscopeContext.moveTo(index, amplitude);
+        oscilloscopeContext.moveTo(x, amplitude);
     });
 };
 // Draw Frequency Graph
 var drawFrequencyGraph = function () {
     frequencyGraphContext.clearRect(0, 0, frequencyGraphCanvas.width, frequencyGraphCanvas.height);
+    var hueMult = 360 / analyserNode.frequencyBinCount;
     frequencyDomainBuffer.forEach(function (frequency, index) {
         /*
         const hue =
@@ -69,8 +75,8 @@ var drawFrequencyGraph = function () {
         
         frequencyGraphContext.fillStyle = `hsl(${hue}, 100%, ${lightness}%)`;
         */
-        var hue = index * (360 / analyserNode.frequencyBinCount);
-        var lightness = frequency * (50 / 255);
+        var hue = index * hueMult;
+        var lightness = frequency * lightMult;
         frequencyGraphContext.fillStyle = "hsl(".concat(hue, ", 100%, ").concat(lightness, "%)");
         frequencyGraphContext.fillRect(index, 256 - frequency, 1, frequency);
     });
@@ -92,7 +98,7 @@ var drawSpectrogram = function () {
     */
     analyserNode.getByteTimeDomainData(timeDomainBuffer);
     analyserNode.getByteFrequencyData(frequencyDomainBuffer);
-    // drawOscilloscope();
+    drawOscilloscope();
     drawFrequencyGraph();
     drawSpectrogram();
     // hueCounter++;
